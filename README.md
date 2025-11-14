@@ -20,11 +20,14 @@ expressjs-module/
 │   ├── models/
 │   │   └── userModel.js      # User model (data layer)
 │   ├── controllers/
-│   │   └── userController.js # User controller (business logic)
+│   │   ├── userController.js # User controller (business logic)
+│   │   └── authController.js # Auth controller (login/register)
 │   └── routes/
 │       ├── index.js          # Main router
-│       └── userRoutes.js     # User routes
+│       ├── userRoutes.js     # User routes
+│       └── authRoutes.js     # Auth routes (login/register)
 ├── .env                      # Environment variables
+├── .env.example              # Environment variables template
 ├── .gitignore
 ├── package.json
 └── README.md
@@ -62,6 +65,23 @@ npm start
 - `GET /` - Welcome message
 - `GET /api/health` - Health check
 
+### Authentication
+- `POST /api/auth/login` - User login
+  ```json
+  {
+    "email": "user@example.com",
+    "password": "password123"
+  }
+  ```
+- `POST /api/auth/register` - User registration
+  ```json
+  {
+    "name": "John Doe",
+    "email": "john@example.com",
+    "password": "password123"
+  }
+  ```
+
 ### Users
 - `GET /api/users` - Get all users
 - `GET /api/users/:id` - Get user by ID
@@ -69,7 +89,8 @@ npm start
   ```json
   {
     "name": "John Doe",
-    "email": "john@example.com"
+    "email": "john@example.com",
+    "password": "password123"
   }
   ```
 - `PUT /api/users/:id` - Update user
@@ -83,12 +104,25 @@ npm start
 
 ## Environment Variables
 
-Create a `.env` file in the root directory:
+Create a `.env` file in the root directory (or copy from `.env.example`):
 
 ```
 PORT=3000
 NODE_ENV=development
+SUPABASE_URL=your_supabase_project_url
+SUPABASE_ANON_KEY=your_supabase_anon_key
 ```
+
+## Database Setup (Supabase)
+
+1. Create a Supabase project at https://supabase.com
+2. Create a `users` table with the following columns:
+   - `id` (UUID, Primary Key)
+   - `name` (Text)
+   - `email` (Text, Unique)
+   - `password` (Text)
+   - `created_at` (Timestamp with timezone)
+3. Copy your Supabase URL and Anon Key to `.env` file
 
 ## ES Modules Note
 

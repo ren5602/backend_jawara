@@ -47,13 +47,13 @@ export const getUserById = (req, res) => {
 // Create new user
 export const createUser = (req, res) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, password } = req.body;
     
     // Validation
-    if (!name || !email) {
+    if (!name || !email || !password) {
       return res.status(400).json({
         success: false,
-        message: 'Name and email are required'
+        message: 'Name, email, and password are required'
       });
     }
     

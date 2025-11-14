@@ -1,5 +1,6 @@
 import express from 'express';
 import userRoutes from './userRoutes.js';
+import authRoutes from './authRoutes.js';
 
 const router = express.Router();
 
@@ -10,6 +11,9 @@ router.get('/health', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// Auth routes
+router.use('/auth', authRoutes);
 
 // User routes
 router.use('/users', userRoutes);

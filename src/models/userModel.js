@@ -1,61 +1,103 @@
-// Sample in-memory database
-let users = [
-  { id: 1, name: 'John Doe', email: 'john@example.com', createdAt: new Date() },
-  { id: 2, name: 'Jane Smith', email: 'jane@example.com', createdAt: new Date() }
-];
+import { createClient } from "@supabase/supabase-js";
+import dotenv from "dotenv";
+
+dotenv.config();
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_ANON_KEY
+);
 
 class UserModel {
   // Get all users
-  static findAll() {
-    return users;
+  static async findAll() {
+    const { data, error } = await supabase.from("users").select("*");
+    if (error) throw error;
+    return data;
   }
 
   // Find user by ID
-  static findById(id) {
-    return users.find(user => user.id === id);
+  static async findById(id) {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("id", id)
+      .single();
+    if (error) throw error;
+    return data;
   }
 
   // Find user by email
-  static findByEmail(email) {
-    return users.find(user => user.email === email);
+  static async findByEmail(email) {
+    const { data, error } = await supabase
+      .from("users")
+      .select("*")
+      .eq("email", email)
+      .single();
+    if (error) return null;
+    return data;
+  }
+
+  // User login
+  static async login(email, password) {
+    try {
+      const user = await this.findByEmail(email);
+
+      if (!user) {
+        return { success: false, message: "User tidak ditemukan" };
+      }
+
+      if (user.password !== password) {
+        return { success: false, message: "Password salah" };
+      }
+
+      return {
+        success: true,
+        message: "Login berhasil",
+        user: { id: user.id, name: user.name, email: user.email },
+      };
+    } catch (error) {
+      return { success: false, message: error.message };
+    }
   }
 
   // Create new user
-  static create(userData) {
-    const newUser = {
-      id: users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1,
-      ...userData,
-      createdAt: new Date()
-    };
-    users.push(newUser);
-    return newUser;
+  static async create(userData) {
+    const { data, error } = await supabase
+      .from("users")
+      .insert([userData])
+      .select();
+    if (error) throw error;
+    return data[0];
   }
 
   // Update user
-  static update(id, userData) {
-    const index = users.findIndex(user => user.id === id);
-    if (index === -1) return null;
-    
-    users[index] = {
-      ...users[index],
-      ...userData,
-      updatedAt: new Date()
-    };
-    return users[index];
+  static async update(id, userData) {
+    const { data, error } = await supabase
+      .from("users")
+      .update(userData)
+      .eq("id", id)
+      .select();
+    if (error) throw error;
+    return data[0];
   }
 
   // Delete user
-  static delete(id) {
-    const index = users.findIndex(user => user.id === id);
-    if (index === -1) return false;
-    
-    users.splice(index, 1);
+  static async delete(id) {
+    const { error } = await supabase
+      .from("users")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
     return true;
   }
 
   // Get total count
-  static count() {
-    return users.length;
+  static async count() {
+    const { count, error } = await supabase
+      .from("users")
+      .select("*", { count: "exact", head: true });
+    if (error) throw error;
+    return count;
   }
 }
 
